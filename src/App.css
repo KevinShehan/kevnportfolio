@@ -1,5 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
+/* Mobile Overflow Security Reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
 :root {
   /* Default Light Mode Colors */
   --bg-color: #f8fafc;
@@ -30,12 +39,16 @@ body {
   background-color: var(--bg-color);
   color: var(--text-primary);
   line-height: 1.6;
-  overflow-x: hidden;
   background-image: 
     radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.08), transparent 25%),
     radial-gradient(circle at 85% 30%, rgba(236, 72, 153, 0.08), transparent 25%);
   background-attachment: fixed;
   transition: background-color 0.4s ease, color 0.4s ease, background-image 0.4s ease;
+}
+
+/* Overflow containment on #root so it doesn't clip fixed-position portals on body */
+#root {
+  overflow-x: hidden;
 }
 
 [data-theme="dark"] body {
@@ -409,46 +422,7 @@ h1, h2, h3, h4 {
   }
 }
 
-/* Scroll to Top Component */
-.scroll-to-top {
-  position: fixed;
-  bottom: 1.5rem;
-  right: 1.5rem;
-  z-index: 1000;
-  cursor: pointer;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(20px) scale(0.9);
-  transition: opacity 0.4s ease, visibility 0.4s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  border-radius: 50%;
-  color: var(--text-primary);
-  background: var(--glass-bg);
-  backdrop-filter: blur(8px);
-}
-
-@media (min-width: 768px) {
-  .scroll-to-top {
-    bottom: 2rem;
-    right: 2rem;
-  }
-}
-
-.scroll-to-top.visible {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0) scale(1);
-}
-.scroll-to-top:hover {
-  transform: translateY(-5px) scale(1.05);
-  box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
-}
-.scroll-to-top:hover .arrow-icon {
-  stroke: var(--accent-3);
-  fill: var(--accent-3); 
-}
-.arrow-icon {
-  transition: all 0.3s ease;
-}
+/* Scroll to Top — styles now handled via inline React + Portal */
 
 /* Theme Toggle */
 .theme-toggle-btn {
@@ -504,4 +478,81 @@ h1, h2, h3, h4 {
 }
 .theme-toggle-btn[data-state="dark"] .theme-toggle-slider {
   transform: translateX(54px);
+}
+
+/* Scroll To Top Specific Hacks */
+.progress-ring {
+  display: block;
+}
+.progress-circle {
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+}
+
+/* Custom Cursor — only hide native cursor on desktop where custom cursor is visible */
+@media (min-width: 769px) {
+  html {
+    cursor: none;
+  }
+  * {
+    cursor: none !important;
+  }
+}
+.custom-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--accent-1);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 9999;
+  transition: width 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+              height 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+              background-color 0.3s ease, border-color 0.3s ease;
+}
+.custom-cursor.hovering {
+  width: 60px;
+  height: 60px;
+  background-color: rgba(236, 72, 153, 0.1);
+  border-color: var(--accent-3);
+  mix-blend-mode: difference;
+}
+.custom-cursor-dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 8px;
+  height: 8px;
+  background-color: var(--accent-1);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 10000;
+}
+.custom-cursor-dot.hovering {
+  transform: translate(-50%, -50%) scale(0);
+}
+
+/* Mobile: hide custom cursor elements entirely */
+@media (max-width: 768px) {
+  .custom-cursor, .custom-cursor-dot {
+    display: none !important;
+  }
+}
+
+/* Scroll Fade In Animations */
+.fade-in-section {
+  opacity: 0;
+  transform: translateY(40px);
+  visibility: hidden;
+  transition: opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  will-change: opacity, transform, visibility;
+}
+.fade-in-section.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  visibility: visible;
 }

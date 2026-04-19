@@ -1,5 +1,6 @@
 import React from 'react';
 import myImage from '../assets/images/images.jpeg';
+import Parallax from '../components/Parallax';
 
 const Hero = () => {
   return (
@@ -11,7 +12,9 @@ const Hero = () => {
           <button className="btn-primary" onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })}>View My Work</button>
         </div>
         <div className="hero-image-container">
-          <img src={myImage} alt="Kevin" className="hero-image" />
+          <Parallax speed={-0.12}>
+            <img src={myImage} alt="Kevin" className="hero-image" />
+          </Parallax>
         </div>
       </div>
     </section>

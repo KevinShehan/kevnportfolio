@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import ReactDOM from 'react-dom';
 
 const ScrollToTop = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -8,59 +9,74 @@ const ScrollToTop = () => {
   const circumference = 2 * Math.PI * radius;
 
   useEffect(() => {
-    let ticking = false;
-
     const handleScroll = () => {
-      // Use requestAnimationFrame for 60FPS fluid animation without blocking main thread
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const scrollTotal = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-          if (scrollTotal > 0) {
-            const scrollY = window.scrollY;
-            const progress = Math.min(1, Math.max(0, scrollY / scrollTotal));
-            
-            // Toggle visibility - only update React state when crossing threshold
-            if (progress > 0.01 && !isVisible) {
-              setIsVisible(true);
-            } else if (progress <= 0.01 && isVisible) {
-              setIsVisible(false);
-            }
+      const scrollY = window.pageYOffset || window.scrollY || document.documentElement.scrollTop || 0;
+      setIsVisible(scrollY > 200);
 
-            // Direct DOM manipulation of the SVG dash offset for hyper-smooth scrolling animation (avoids React re-renders)
-            if (circleRef.current) {
-              const strokeDashoffset = circumference - (progress * circumference);
-              circleRef.current.style.strokeDashoffset = strokeDashoffset;
-            }
-          }
-          ticking = false;
-        });
-        ticking = true;
+      if (circleRef.current) {
+        const scrollHeight = Math.max(
+          document.body.scrollHeight,
+          document.documentElement.scrollHeight
+        );
+        const clientHeight = window.innerHeight;
+        const scrollTotal = scrollHeight - clientHeight;
+        
+        if (scrollTotal > 0) {
+          const progress = Math.min(1, Math.max(0, scrollY / scrollTotal));
+          const offset = circumference - (progress * circumference);
+          circleRef.current.style.strokeDashoffset = String(offset);
+        }
       }
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    // Initialize immediately
+    // Run immediately on mount
     handleScroll();
+    // Also run after a short delay to catch late-loading content
+    const timer = setTimeout(handleScroll, 500);
 
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [isVisible, circumference]);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearTimeout(timer);
+    };
+  }, [circumference]);
 
   const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  return (
+  // Use a portal to render directly into document.body
+  // This guarantees the button is NEVER clipped or hidden by any parent container
+  return ReactDOM.createPortal(
     <div 
-      className={`scroll-to-top ${isVisible ? 'visible' : ''}`}
       onClick={scrollToTop}
       title="Back to Top"
+      style={{
+        position: 'fixed',
+        bottom: '2rem',
+        right: '2rem',
+        zIndex: 99999,
+        opacity: isVisible ? 1 : 0,
+        pointerEvents: isVisible ? 'auto' : 'none',
+        visibility: isVisible ? 'visible' : 'hidden',
+        transform: isVisible ? 'translateY(0) scale(1)' : 'translateY(20px) scale(0.8)',
+        transition: 'opacity 0.4s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), visibility 0.4s ease',
+        borderRadius: '50%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        cursor: 'pointer',
+        color: 'var(--text-primary)',
+        background: 'var(--glass-bg, rgba(255,255,255,0.7))',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        border: '1px solid var(--glass-border, rgba(0,0,0,0.05))',
+        boxShadow: isVisible ? '0 8px 32px rgba(99, 102, 241, 0.2)' : 'none',
+      }}
     >
-      <svg width="64" height="64" viewBox="0 0 64 64" className="progress-ring">
+      <svg width="64" height="64" viewBox="0 0 64 64">
         {/* Background track */}
-        <circle cx="32" cy="32" r={radius} fill="var(--glass-bg)" stroke="var(--glass-border)" strokeWidth="3" />
+        <circle cx="32" cy="32" r={radius} fill="none" stroke="var(--glass-border, rgba(0,0,0,0.1))" strokeWidth="3" />
         
         {/* Animated Progress ring */}
         <circle
@@ -69,37 +85,35 @@ const ScrollToTop = () => {
           cy="32"
           r={radius}
           fill="none"
-          stroke="url(#gradient-ring)"
+          stroke="url(#scroll-gradient-ring)"
           strokeWidth="3"
           strokeDasharray={circumference}
-          strokeDashoffset={circumference} // Start empty
+          strokeDashoffset={circumference}
           strokeLinecap="round"
-          className="progress-circle"
+          style={{ transform: 'rotate(-90deg)', transformOrigin: '50% 50%' }}
         />
         <defs>
-          <linearGradient id="gradient-ring" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="var(--accent-1)" />
-            <stop offset="100%" stopColor="var(--accent-3)" />
+          <linearGradient id="scroll-gradient-ring" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="var(--accent-1, #6366f1)" />
+            <stop offset="100%" stopColor="var(--accent-3, #ec4899)" />
           </linearGradient>
         </defs>
         
-        {/* Stylish Modern Rocket / Jet Arrow */}
-        {/* Wrapped in a 'g' rotated 90deg to compensate for the .progress-ring css -90deg rotation */}
-        <g transform="rotate(90 32 32)">
-           <path 
-             d="M32 20 L32 44 M32 20 L24 28 M32 20 L40 28" 
-             stroke="currentColor" 
-             strokeWidth="3" 
-             strokeLinecap="round" 
-             strokeLinejoin="round" 
-             fill="none"
-             className="arrow-icon"
-           />
-           {/* Thrust tail detail for tech vibe */}
-           <path d="M28 44 L32 48 L36 44" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" opacity="0.5"/>
+        {/* Arrow icon */}
+        <g>
+          <path 
+            d="M32 22 L32 42 M32 22 L26 28 M32 22 L38 28" 
+            stroke="currentColor" 
+            strokeWidth="3" 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+            fill="none"
+          />
+          <path d="M28 42 L32 46 L36 42" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" opacity="0.5"/>
         </g>
       </svg>
-    </div>
+    </div>,
+    document.body
   );
 };
 
