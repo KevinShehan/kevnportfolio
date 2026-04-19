@@ -2,10 +2,12 @@ import React from 'react';
 
 const TimelineCard = ({ title, date, description }) => {
   return (
-    <div className="timeline-card" style={{ borderLeft: '2px solid #333', paddingLeft: '1rem', marginBottom: '1rem' }}>
-      <h4>{title}</h4>
-      <span style={{ fontSize: '0.8rem', color: '#666' }}>{date}</span>
-      <p>{description}</p>
+    <div className="timeline-item">
+      <div className="glass styled-card" style={{ padding: '1.5rem' }}>
+        <h4 className="text-gradient">{title}</h4>
+        <span>{date}</span>
+        <p>{description}</p>
+      </div>
     </div>
   );
 };

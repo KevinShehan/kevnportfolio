@@ -2,14 +2,17 @@ import React from 'react';
 
 const Skills = () => {
   return (
-    <section id="skills" style={{ padding: '4rem 2rem' }}>
-      <h2>Skills</h2>
-      <ul style={{ display: 'flex', gap: '1rem', listStyle: 'none', padding: 0 }}>
-        <li>React</li>
-        <li>JavaScript</li>
-        <li>CSS</li>
-        <li>Node.js</li>
-      </ul>
+    <section id="skills" className="section-container">
+      <h2 className="section-heading text-gradient">My Skills</h2>
+      <div className="skills-list">
+        <span className="skill-tag text-gradient">React</span>
+        <span className="skill-tag text-gradient">JavaScript</span>
+        <span className="skill-tag">CSS3</span>
+        <span className="skill-tag text-gradient">HTML5</span>
+        <span className="skill-tag">Node.js</span>
+        <span className="skill-tag text-gradient">UI/UX Design</span>
+        <span className="skill-tag">Animations</span>
+      </div>
     </section>
   );
 };

@@ -2,7 +2,7 @@ import React from 'react';
 
 const Button = ({ children, onClick }) => {
   return (
-    <button className="btn" onClick={onClick} style={{ padding: '0.5rem 1rem', cursor: 'pointer' }}>
+    <button className="btn-primary" onClick={onClick}>
       {children}
     </button>
   );

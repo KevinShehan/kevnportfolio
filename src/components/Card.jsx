@@ -2,8 +2,8 @@ import React from 'react';
 
 const Card = ({ title, description }) => {
   return (
-    <div className="card" style={{ border: '1px solid #ccc', padding: '1rem', borderRadius: '8px' }}>
-      <h3>{title}</h3>
+    <div className="glass styled-card">
+      <h3 className="text-gradient">{title}</h3>
       <p>{description}</p>
     </div>
   );
